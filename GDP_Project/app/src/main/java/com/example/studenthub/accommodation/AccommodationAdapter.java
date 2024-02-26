@@ -35,4 +35,37 @@ public class AccommodationAdapter extends RecyclerView.Adapter<AccommodationAdap
         this.onItemClickListener = listener;
     }
 
+    @NonNull
+    @Override
+    public AccommodationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_accommodation, parent, false);
+        return new AccommodationViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(AccommodationViewHolder holder, int position) {
+        Accommodation currentItem = dataList.get(position);
+        holder.tvDescription.setText(currentItem.getDescription());
+        holder.tvName.setText(currentItem.getName());
+        holder.tvPrice.setText("$" + currentItem.getPrice());
+        holder.tvLocation.setText(currentItem.getLocation());
+
+        Glide.with(context).load(currentItem.getImageUrl()).into(holder.iv);
+
+        String buttonText;
+        if (currentItem.isAvailable()) {
+            buttonText = "Reserve";
+        } else {
+            buttonText = "Not Available";
+        }
+        holder.btReserve.setText(buttonText);
+        holder.btReserve.setOnClickListener(view -> {
+            if (!currentItem.isAvailable()) {
+                Toast.makeText(context, "Not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            onItemClickListener.onItemClick(currentItem);
+        });
+    }
+
 }
