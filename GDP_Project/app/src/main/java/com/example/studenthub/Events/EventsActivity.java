@@ -31,25 +31,25 @@ public class EventsActivity extends AppCompatActivity implements OnItemClickList
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_events);
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_events);
 
-        progressDialog = new ProgressDialog(this);
+    progressDialog = new ProgressDialog(this);
 
-        srl = findViewById(R.id.srl);
-        ivBack = findViewById(R.id.ivBack);
-        rv = findViewById(R.id.rvEvents);
+    srl = findViewById(R.id.srl);
+    ivBack = findViewById(R.id.ivBack);
+    rv = findViewById(R.id.rvEvents);
 
-        ivBack.setOnClickListener(v -> finish());
+    ivBack.setOnClickListener(v -> finish());
 
+    loadData();
+
+    srl.setOnRefreshListener(() -> {
         loadData();
+        new Handler().postDelayed(() -> srl.setRefreshing(false), 1000);
+    });
+}
 
-        srl.setOnRefreshListener(() -> {
-            loadData();
-            new Handler().postDelayed(() -> {
-                srl.setRefreshing(false);
-            }, 1000);
-        });
 
     }
 
