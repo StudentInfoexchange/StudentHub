@@ -44,18 +44,44 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
     }
 
     @Override
-    public void onBindViewHolder(EventsViewHolder holder, int position) {
-        Event currentItem = dataList.get(position);
-        holder.tvDescription.setText(currentItem.getDescription());
-        holder.tvName.setText(currentItem.getTitle());
-        String date = dateFormat(currentItem.getDate());
-        holder.tvDate.setText("" + date);
-        holder.tvLocation.setText(currentItem.getLocation());
+   public void onBindViewHolder(EventsViewHolder holder, int position) {
+    // Retrieve the current item from the data list
+    Event currentItem = dataList.get(position);
 
-        Glide.with(context).load(currentItem.getImageUrl()).into(holder.iv);
+    // Set the description
+    String description = currentItem.getDescription();
+    holder.tvDescription.setText(description);
 
-        holder.btRSVP.setOnClickListener(view -> onItemClickListener.onItemClick(currentItem));
-    }
+    // Set the title
+    String title = currentItem.getTitle();
+    holder.tvName.setText(title);
+
+    // Set the formatted date
+    String formattedDate = dateFormat(currentItem.getDate());
+    holder.tvDate.setText(formattedDate);
+
+    // Set the location
+    String location = currentItem.getLocation();
+    holder.tvLocation.setText(location);
+
+    // Load image using Glide
+    String imageUrl = currentItem.getImageUrl();
+    Glide.with(context)
+         .load(imageUrl)
+         .into(holder.iv);
+
+    // Set click listener for RSVP button
+    holder.btRSVP.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            // Invoke onItemClick method of the OnItemClickListener interface
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(currentItem);
+            }
+        }
+    });
+}
+
 
     @Override
     public int getItemCount() {
