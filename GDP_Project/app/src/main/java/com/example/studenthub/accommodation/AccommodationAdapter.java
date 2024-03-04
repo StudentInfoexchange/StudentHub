@@ -67,5 +67,4 @@ public class AccommodationAdapter extends RecyclerView.Adapter<AccommodationAdap
             onItemClickListener.onItemClick(currentItem);
         });
     }
-
 }
