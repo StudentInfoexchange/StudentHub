@@ -4,6 +4,7 @@ package com.example.studenthub.events;
 import static com.example.studenthub.utils.Utils.dateFormat;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.studenthub.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
@@ -44,44 +46,32 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
     }
 
     @Override
-   public void onBindViewHolder(EventsViewHolder holder, int position) {
-    // Retrieve the current item from the data list
-    Event currentItem = dataList.get(position);
+    public void onBindViewHolder(EventsViewHolder holder, int position) {
+        Event currentItem = dataList.get(position);
+        holder.tvDescription.setText(currentItem.getDescription());
+        holder.tvName.setText(currentItem.getTitle());
+        String date = dateFormat(currentItem.getDate());
+        holder.tvDate.setText("" + date);
+        holder.tvLocation.setText(currentItem.getLocation());
 
-    // Set the description
-    String description = currentItem.getDescription();
-    holder.tvDescription.setText(description);
+        Glide.with(context).load(currentItem.getImageUrl()).into(holder.iv);
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        boolean isAddedByYou = TextUtils.equals(currentItem.getOwnerId(), uid);
+        String btRSVPText;
+        if (isAddedByYou) {
+            btRSVPText = "Added by you";
+        } else {
+            btRSVPText = "RSVP";
+        }
 
-    // Set the title
-    String title = currentItem.getTitle();
-    holder.tvName.setText(title);
+        holder.btRSVP.setText(btRSVPText);
 
-    // Set the formatted date
-    String formattedDate = dateFormat(currentItem.getDate());
-    holder.tvDate.setText(formattedDate);
-
-    // Set the location
-    String location = currentItem.getLocation();
-    holder.tvLocation.setText(location);
-
-    // Load image using Glide
-    String imageUrl = currentItem.getImageUrl();
-    Glide.with(context)
-         .load(imageUrl)
-         .into(holder.iv);
-
-    // Set click listener for RSVP button
-    holder.btRSVP.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            // Invoke onItemClick method of the OnItemClickListener interface
-            if (onItemClickListener != null) {
+        holder.btRSVP.setOnClickListener(v -> {
+            if (!isAddedByYou) {
                 onItemClickListener.onItemClick(currentItem);
             }
-        }
-    });
-}
-
+        });
+    }
 
     @Override
     public int getItemCount() {
