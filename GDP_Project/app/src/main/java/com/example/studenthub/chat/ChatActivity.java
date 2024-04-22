@@ -55,6 +55,10 @@ public class ChatActivity extends AppCompatActivity {
         ivBack = findViewById(R.id.ivBack);
         chatUserName = findViewById(R.id.tvUserName);
 
+        if (TextUtils.isEmpty(groupInfo.getRegarding())) {
+            chatUserName.setVisibility(View.GONE);
+        }
+
         chatUserName.setText(groupInfo.getRegarding());
         ivBack.setOnClickListener(v -> finish());
 
