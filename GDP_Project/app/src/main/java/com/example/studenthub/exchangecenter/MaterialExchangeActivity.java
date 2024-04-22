@@ -3,8 +3,10 @@ package com.example.studenthub.material_exchange;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.studenthub.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,11 +31,20 @@ public class MaterialExchangeActivity extends AppCompatActivity implements OnIte
     RecyclerView rv;
     ProgressDialog progressDialog;
     MaterialListAdapter adapter;
+    EditText etSearch;
+    ArrayList<Material> materialList;
+    ArrayList<Material> filteredMaterialList;
+
+    boolean isShowingHistory = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_material_exchange);
+
+        if (getIntent() != null) {
+            isShowingHistory = getIntent().getBooleanExtra("isShowingHistory", false);
+        }
 
         progressDialog = new ProgressDialog(this);
 
@@ -40,6 +52,10 @@ public class MaterialExchangeActivity extends AppCompatActivity implements OnIte
         ivAdd = findViewById(R.id.ivAdd);
         ivRefresh = findViewById(R.id.ivRefresh);
         rv = findViewById(R.id.rv);
+        etSearch = findViewById(R.id.etSearch);
+
+        materialList = new ArrayList<>();
+        filteredMaterialList = new ArrayList<>();
 
         ivBack.setOnClickListener(v -> finish());
         ivAdd.setOnClickListener(new View.OnClickListener() {
@@ -51,15 +67,59 @@ public class MaterialExchangeActivity extends AppCompatActivity implements OnIte
 
         ivRefresh.setOnClickListener(v -> loadData());
 
+        searchFunction();
+
+    }
+
+    private void searchFunction() {
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String searchText = s.toString().toLowerCase().trim();
+                if (searchText.isEmpty()) {
+                    setList(materialList);
+                } else if (searchText.length() > 2) {
+                    filteredMaterialList.clear();
+                    for (Material material : materialList) {
+                        if (material.getTitle().toLowerCase().contains(searchText) ||
+                                material.getType().toLowerCase().contains(searchText) ||
+                                material.getSubCategory().toLowerCase().contains(searchText)) {
+                            filteredMaterialList.add(material);
+                        }
+                    }
+                    setList(filteredMaterialList);
+                }
+            }
+        });
     }
 
     void loadData() {
         progressDialog.show();
-        FirebaseFirestore.getInstance().collection("MaterialExchange").get().addOnCompleteListener(task -> {
+        Query ref;
+        if (!isShowingHistory) {
+            ref = FirebaseFirestore.getInstance().collection("MaterialExchange");
+        } else {
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            ref = FirebaseFirestore.getInstance().collection("MaterialExchange")
+                    .whereEqualTo("studentId", uid);
+        }
+        ref.get().addOnCompleteListener(task -> {
             progressDialog.hide();
             if (task.isSuccessful()) {
+
                 List<Material> list = task.getResult().toObjects(Material.class);
+                materialList.clear();
+                materialList.addAll(list);
                 setList(list);
+
             } else {
                 Toast.makeText(MaterialExchangeActivity.this, "" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
