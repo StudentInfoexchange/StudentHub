@@ -226,3 +226,4 @@ public class BookRideActivity extends AppCompatActivity {
 
     }
 }
+}
