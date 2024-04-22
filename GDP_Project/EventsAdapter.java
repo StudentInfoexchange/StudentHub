@@ -59,7 +59,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
         boolean isAddedByYou = TextUtils.equals(currentItem.getOwnerId(), uid);
         String btRSVPText;
         if (isAddedByYou) {
-            btRSVPText = "Added by you";
+            btRSVPText = "Edit";
         } else {
             btRSVPText = "RSVP";
         }
@@ -67,9 +67,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
         holder.btRSVP.setText(btRSVPText);
 
         holder.btRSVP.setOnClickListener(v -> {
-            if (!isAddedByYou) {
-                onItemClickListener.onItemClick(currentItem);
-            }
+            onItemClickListener.onItemClick(currentItem, isAddedByYou);
         });
     }
 
